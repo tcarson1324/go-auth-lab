@@ -45,6 +45,9 @@ func main() {
 	mux.HandleFunc("POST /login", func(w http.ResponseWriter, r *http.Request) {
 		handlers.HandlerLogin(w, r, db)
 	})
+	mux.HandleFunc("POST /logout", func(w http.ResponseWriter, r *http.Request) {
+    handlers.HandlerLogout(w, r, db)
+})
 	err = http.ListenAndServe(":8080", mux)
 	if err != nil {
 		log.Fatal(err)
