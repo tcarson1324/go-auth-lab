@@ -2,12 +2,10 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
-	"log"
-	"net/http"
-
 	"go-auth-lab/handlers"
 	"go-auth-lab/middleware"
+	"log"
+	"net/http"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
@@ -26,16 +24,24 @@ func main() {
 		log.Fatal(err)
 	}
 	mux := http.NewServeMux()
-	profileHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userID, ok := middleware.UserIDFromContext(r.Context())
-		if !ok {
-			http.Error(w, "internal server error", http.StatusInternalServerError)
-			return
-		}
 
-		fmt.Fprintf(w, "You are logged in as user %d\n", userID)
+	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		handlers.HandlerHomePage(w, r, db)
 	})
-	mux.Handle("GET /profile", middleware.RequireAuth(db, profileHandler))
+	mux.Handle("POST /notes",
+		middleware.RequireAuth(db,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				handlers.HandlerCreateNote(w, r, db)
+			}),
+		),
+	)
+	mux.Handle("GET /profile",
+		middleware.RequireAuth(db,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				handlers.HandlerProfile(w, r, db)
+			}),
+		),
+	)
 
 	mux.HandleFunc("GET /register", handlers.HandlerRegisterPage)
 	mux.HandleFunc("POST /register", func(w http.ResponseWriter, r *http.Request) {
@@ -46,8 +52,8 @@ func main() {
 		handlers.HandlerLogin(w, r, db)
 	})
 	mux.HandleFunc("POST /logout", func(w http.ResponseWriter, r *http.Request) {
-    handlers.HandlerLogout(w, r, db)
-})
+		handlers.HandlerLogout(w, r, db)
+	})
 	err = http.ListenAndServe(":8080", mux)
 	if err != nil {
 		log.Fatal(err)

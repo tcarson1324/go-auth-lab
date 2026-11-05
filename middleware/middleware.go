@@ -1,15 +1,17 @@
 package middleware
 
 import (
+	"context"
 	"database/sql"
 	"errors"
-	"net/http"
-	"context"
 	"go-auth-lab/sessions"
+	"net/http"
 )
-type contextKey string	
+
+type contextKey string
 
 const userIDKey contextKey = "userID"
+
 func RequireAuth(db *sql.DB, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -39,6 +41,6 @@ func RequireAuth(db *sql.DB, next http.Handler) http.Handler {
 }
 
 func UserIDFromContext(ctx context.Context) (int64, bool) {
-    userID, ok := ctx.Value(userIDKey).(int64)
-    return userID, ok
+	userID, ok := ctx.Value(userIDKey).(int64)
+	return userID, ok
 }

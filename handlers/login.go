@@ -51,7 +51,7 @@ func HandlerLogin(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	token, err := sessions.GenerateToken()
 	if err != nil {
 		http.Error(w, "could not create session", http.StatusInternalServerError)
-		return 
+		return
 	}
 
 	tokenHash := sessions.HashToken(token)
@@ -61,5 +61,6 @@ func HandlerLogin(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 	sessions.SetCookie(w, token, expiresAt)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 
 }

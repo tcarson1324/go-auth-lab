@@ -16,7 +16,7 @@ func HandlerLogout(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		}
 
 		sessions.ClearCookie(w)
-		w.WriteHeader(http.StatusNoContent)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 
@@ -29,5 +29,5 @@ func HandlerLogout(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 
 	sessions.ClearCookie(w)
-	w.WriteHeader(http.StatusNoContent)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

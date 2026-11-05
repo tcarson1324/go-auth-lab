@@ -65,4 +65,5 @@ func HandlerAddUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "couldn't create new user", http.StatusInternalServerError)
 		return
 	}
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

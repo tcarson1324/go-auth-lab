@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Profile</title>
+</head>
+<body>
+    <h1>Welcome, {{.Username}}!</h1>
+
+    <p>User ID: {{.UserID}}</p>
+
+    <h2>Your Notes</h2>
+
+    {{range .Notes}}
+        <div>
+            <p>{{.Content}}</p>
+        </div>
+    {{else}}
+        <p>You haven't created any notes yet.</p>
+    {{end}}
+    <h2>Create a New Note</h2>
+
+<form action="/notes" method="POST">
+    <textarea
+        name="content"
+        rows="5"
+        cols="40"
+        placeholder="Write your note here..."
+        required
+    ></textarea>
+
+    <br>
+
+    <button type="submit">Create Note</button>
+</form>
+    <a href="/">Back to Home</a>
+</body>
+</html>

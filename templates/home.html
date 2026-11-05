@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go Auth Lab</title>
+</head>
+<body>
+<h1>Go Auth Lab</h1>
+    {{if .LoggedIn}}
+    <h2>Welcome back to the lab!</h2>
+{{else}}
+    <h2>Welcome to the lab!</h2>
+{{end}}
+
+    <p>A simple authentication system built with Go and PostgreSQL.</p>
+<nav>
+    {{if .LoggedIn}}
+        <a href="/profile">Profile</a>
+
+        <form action="/logout" method="POST">
+            <button type="submit">Logout</button>
+        </form>
+    {{else}}
+        <a href="/register">Register</a>
+        <a href="/login">Login</a>
+    {{end}}
+</nav>
+   
+   
+
+</body>
+</html>

@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
 	"go-auth-lab/passwords"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgconn"
 )
@@ -66,3 +66,26 @@ func GetUserByName(name string, db *sql.DB) (User, error) {
 	return currentUser, nil
 }
 
+func GetUserByID(id int64, db *sql.DB) (User, error) {
+
+	query := `
+	SELECT id, username, password_hash, created_at
+	FROM users
+	WHERE id = $1
+	`
+	currentUser := User{}
+	row := db.QueryRow(query, id)
+	err := row.Scan(
+		&currentUser.ID,
+		&currentUser.Username,
+		&currentUser.PasswordHash,
+		&currentUser.CreatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return currentUser, ErrUserNotFound
+		}
+		return currentUser, err
+	}
+	return currentUser, nil
+}
