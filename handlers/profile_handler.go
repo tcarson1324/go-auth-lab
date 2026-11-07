@@ -2,17 +2,18 @@ package handlers
 
 import (
 	"database/sql"
-	"go-auth-lab/middleware"
-	"net/http"
-	"go-auth-lab/notes"
-	"html/template"
-	"go-auth-lab/users"
 	"errors"
+	"go-auth-lab/middleware"
+	"go-auth-lab/notes"
+	"go-auth-lab/users"
+	"html/template"
+	"net/http"
 )
+
 type ProfilePageData struct {
-	UserID int64
+	UserID   int64
 	Username string
-	Notes []notes.Note
+	Notes    []notes.Note
 }
 
 func HandlerProfile(w http.ResponseWriter, r *http.Request, db *sql.DB) {
@@ -23,14 +24,14 @@ func HandlerProfile(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 	user, err := users.GetUserByID(userID, db)
 	if err != nil {
-    	if errors.Is(err, users.ErrUserNotFound) {
-        	http.Error(w, "user not found", http.StatusNotFound)
-        	return
-    }
+		if errors.Is(err, users.ErrUserNotFound) {
+			http.Error(w, "user not found", http.StatusNotFound)
+			return
+		}
 
-    http.Error(w, "internal server error", http.StatusInternalServerError)
-    return
-}
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
 	notes, err := notes.GetNotesByUserID(db, userID)
 	if err != nil {
 		http.Error(w, "couldn't retieve notes", http.StatusInternalServerError)
@@ -41,10 +42,10 @@ func HandlerProfile(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "couldn't parse template", http.StatusInternalServerError)
 		return
 	}
-	 profileData := ProfilePageData{
-		UserID: userID,
+	profileData := ProfilePageData{
+		UserID:   userID,
 		Username: user.Username,
-		Notes: notes,
+		Notes:    notes,
 	}
 	err = tmpl.Execute(w, profileData)
 	if err != nil {

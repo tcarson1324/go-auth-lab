@@ -14,26 +14,35 @@
 
     {{range .Notes}}
         <div>
-            <p>{{.Content}}</p>
+            <p>{{.ID}}. {{.Content}}</p>
+
+            <form action="/notes/delete" method="POST">
+                <input type="hidden" name="note_id" value="{{.ID}}">
+                <button type="submit">Delete Note</button>
+            </form>
         </div>
     {{else}}
         <p>You haven't created any notes yet.</p>
     {{end}}
+
     <h2>Create a New Note</h2>
 
-<form action="/notes" method="POST">
-    <textarea
-        name="content"
-        rows="5"
-        cols="40"
-        placeholder="Write your note here..."
-        required
-    ></textarea>
+    <form action="/notes" method="POST">
+        <textarea
+            name="content"
+            rows="5"
+            cols="40"
+            placeholder="Write your note here..."
+            required
+        ></textarea>
+
+        <br>
+
+        <button type="submit">Create Note</button>
+    </form>
 
     <br>
 
-    <button type="submit">Create Note</button>
-</form>
     <a href="/">Back to Home</a>
 </body>
 </html>

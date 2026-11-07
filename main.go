@@ -35,6 +35,11 @@ func main() {
 			}),
 		),
 	)
+	mux.Handle("POST /notes/delete",
+middleware.RequireAuth(db,
+	http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handlers.HandlerDelteNote(w, r, db)
+	})))
 	mux.Handle("GET /profile",
 		middleware.RequireAuth(db,
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
