@@ -2,12 +2,12 @@ package handlers
 
 import (
 	"database/sql"
+	"errors"
 	"go-auth-lab/middleware"
 	"go-auth-lab/notes"
 	"net/http"
 	"strconv"
 	"strings"
-	"errors"
 )
 
 func HandlerCreateNote(w http.ResponseWriter, r *http.Request, db *sql.DB) {

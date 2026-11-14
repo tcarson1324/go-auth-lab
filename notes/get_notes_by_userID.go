@@ -2,11 +2,7 @@ package notes
 
 import (
 	"database/sql"
-
-
 )
-
-
 
 func GetNotesByUserID(db *sql.DB, userID int64) ([]Note, error) {
 	query := `
