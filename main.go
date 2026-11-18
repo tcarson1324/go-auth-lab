@@ -28,6 +28,11 @@ func main() {
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		handlers.HandlerHomePage(w, r, db)
 	})
+	mux.Handle("GET /notes/edit", middleware.RequireAuth(db,
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			handlers.HandlerEditNote(w, r, db)
+		}),
+	))
 	mux.Handle("POST /notes",
 		middleware.RequireAuth(db,
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -35,6 +40,9 @@ func main() {
 			}),
 		),
 	)
+	mux.Handle("POST /notes/edit",
+		middleware.RequireAuth(db,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { handlers.HandlerUpdateNote(w, r, db) })))
 	mux.Handle("POST /notes/delete",
 		middleware.RequireAuth(db,
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

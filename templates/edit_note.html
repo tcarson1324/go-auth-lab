@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Note</title>
+</head>
+<body>
+    <h1>Edit Note</h1>
+
+    <form action="/notes/edit" method="POST">
+
+        <input type="hidden" name="note_id" value="{{.ID}}">
+
+        <textarea name="content" rows="6" cols="50">{{.Content}}</textarea>
+
+        <button type="submit">Save Changes</button>
+
+    </form>
+
+    <a href="/profile">Cancel</a>
+</body>
+</html>

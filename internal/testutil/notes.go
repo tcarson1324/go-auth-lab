@@ -28,3 +28,22 @@ func CreateTestNote(t *testing.T, db *sql.DB, userID int64) int64 {
 
 	return noteID
 }
+
+func EditTestNote(t *testing.T, db *sql.DB, noteID, userID int64) error {
+	t.Helper()
+	result, err := db.Exec(`
+	UPDATE notes
+	SET content = "this test note has been updated"
+	WHERE id = $2
+	AND user_id = $3
+	`, noteID, userID)
+	rows, err := result.RowsAffected()
+	if err != nil {
+		t.Fatalf("get rows affected: %v", err)
+	}
+
+	if rows != 1 {
+		t.Errorf("rows affected = %d, want 1", rows)
+	}
+	return nil
+}

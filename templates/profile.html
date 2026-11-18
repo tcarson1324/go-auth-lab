@@ -20,6 +20,7 @@
                 <input type="hidden" name="note_id" value="{{.ID}}">
                 <button type="submit">Delete Note</button>
             </form>
+		<a href="/notes/edit?id={{.ID}}">Edit Note</a>
         </div>
     {{else}}
         <p>You haven't created any notes yet.</p>

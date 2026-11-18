@@ -53,19 +53,19 @@ func TestRequireAuthSuccess(t *testing.T) {
 	}
 	hashedToken := sessions.HashToken(token)
 	_, err = sessions.CreateSession(db, userID, hashedToken)
-	
+
 	if err != nil {
 		t.Fatalf("could not create session: %v", err)
 	}
 	t.Cleanup(func() {
-    _, err := db.Exec(
-        "DELETE FROM sessions WHERE token_hash = $1",
-        hashedToken,
-    )
-    if err != nil {
-        t.Errorf("could not clean up session: %v", err)
-    }
-})
+		_, err := db.Exec(
+			"DELETE FROM sessions WHERE token_hash = $1",
+			hashedToken,
+		)
+		if err != nil {
+			t.Errorf("could not clean up session: %v", err)
+		}
+	})
 	req := httptest.NewRequest(http.MethodGet, "/profile", nil)
 
 	req.AddCookie(&http.Cookie{
@@ -84,14 +84,14 @@ func TestRequireAuthSuccess(t *testing.T) {
 }
 
 func TestRequireAuthInvalidSession(t *testing.T) {
-		db := testutil.SetupTestDB(t)
+	db := testutil.SetupTestDB(t)
 	funcExecuted := false
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		funcExecuted = true
 	})
 
 	recorder := httptest.NewRecorder()
-	
+
 	req := httptest.NewRequest(http.MethodGet, "/profile", nil)
 
 	req.AddCookie(&http.Cookie{
@@ -107,6 +107,4 @@ func TestRequireAuthInvalidSession(t *testing.T) {
 		t.Error("protected handler should not execute")
 	}
 
-	
 }
-

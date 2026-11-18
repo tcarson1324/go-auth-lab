@@ -88,3 +88,28 @@ func TestDeleteNoteWrongUser(t *testing.T) {
 		t.Errorf("expected note to still exist, found %d matching notes", count)
 	}
 }
+
+func TestUpdateNoteWrongUser(t *testing.T) {
+	db := testutil.SetupTestDB(t)
+	content := "this test note has been updated"
+	userAID := testutil.CreateTestUser(t, db)
+	userBID := testutil.CreateTestUser(t, db)
+	noteID := testutil.CreateTestNote(t, db, userAID)
+	err := UpdateNote(db, noteID, userBID, content)
+	if !errors.Is(err, ErrNoteNotFound) {
+		t.Errorf("expected ErrNoteNotFound, got %v", err)
+	}
+	var updatedContent string
+	err = db.QueryRow(`
+	SELECT content 
+	FROM notes 
+	WHERE id = $1
+	`, noteID).Scan(&updatedContent)
+	if err != nil {
+		t.Fatalf("could not verify note existence: %v", err)
+	}
+	if updatedContent != "This is a test note" {
+		t.Errorf("expected original note content, got %s", updatedContent)
+	}
+}
+

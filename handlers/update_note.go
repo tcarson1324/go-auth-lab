@@ -2,12 +2,14 @@ package handlers
 
 import (
 	"database/sql"
+	"errors"
 	"go-auth-lab/middleware"
 	"go-auth-lab/notes"
+
+	"html/template"
 	"net/http"
-	"strings"
 	"strconv"
-	"errors"
+	"strings"
 )
 
 func HandlerUpdateNote(w http.ResponseWriter, r *http.Request, db *sql.DB) {
@@ -41,4 +43,43 @@ func HandlerUpdateNote(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 	http.Redirect(w, r, "/profile", http.StatusSeeOther)
+}
+
+func HandlerEditNote(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	userID, ok := middleware.UserIDFromContext(r.Context())
+	if !ok {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	ID := r.URL.Query().Get("id")
+	noteID, err := strconv.ParseInt(ID, 10, 64)
+	if err != nil {
+		http.Error(w, "noteID must be an integer", http.StatusBadRequest)
+		return
+	}
+	if noteID <= 0 {
+		http.Error(w, "id must be greater than 0", http.StatusBadRequest)
+		return
+	}
+	note, err := notes.GetNoteByID(db, noteID, userID)
+	if err != nil {
+		if errors.Is(err, notes.ErrNoteNotFound) {
+			http.Error(w, "note not found", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "could not retrieve note", http.StatusInternalServerError)
+		return
+	}
+	tmpl, err := template.ParseFiles("templates/edit_note.html")
+	if err != nil {
+		http.Error(w, "couldn't parse template", http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, note)
+	if err != nil {
+		http.Error(w, "failed to render template", http.StatusInternalServerError)
+		return
+	}
+
 }
