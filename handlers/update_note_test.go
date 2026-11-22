@@ -38,15 +38,18 @@ func TestEditNoteSuccess(t *testing.T) {
 	db := testutil.SetupTestDB(t)
 	userID := testutil.CreateTestUser(t, db)
 	noteID := testutil.CreateTestNote(t, db, userID)
+	token, _ := testutil.CreateTestSession(t, db, userID)
 	req := httptest.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf("/notes/edit?id=%d", noteID),
 		nil,
 	)
-	ctx := middleware.ContextWithUserID(req.Context(), userID)
-	req = req.WithContext(ctx)
+	req.AddCookie(&http.Cookie{Name: "session", Value: token})
 	recorder := httptest.NewRecorder()
-	HandlerEditNote(recorder, req, db)
+	handler := middleware.RequireAuth(db, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		HandlerEditNote(w, r, db)
+	}))
+	handler.ServeHTTP(recorder, req)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("expected status 200, got %d: %s", recorder.Code, recorder.Body.String())
 	}

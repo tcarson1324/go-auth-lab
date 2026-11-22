@@ -112,4 +112,3 @@ func TestUpdateNoteWrongUser(t *testing.T) {
 		t.Errorf("expected original note content, got %s", updatedContent)
 	}
 }
-

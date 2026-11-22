@@ -7,7 +7,6 @@ import (
 )
 
 func CreateTestSession(t *testing.T, db *sql.DB, userID int64) (token, tokenHash string) {
-
 	token, err := sessions.GenerateToken()
 	if err != nil {
 		t.Fatalf("could not generate token: %v", err)

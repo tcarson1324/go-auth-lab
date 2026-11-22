@@ -3,47 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Profile</title>
+    <title>Profile - Go Auth Lab</title>
 </head>
 <body>
     <h1>Welcome, {{.Username}}!</h1>
 
-    <p>User ID: {{.UserID}}</p>
-
-    <h2>Your Notes</h2>
-
-    {{range .Notes}}
-        <div>
-            <p>{{.ID}}. {{.Content}}</p>
-
-            <form action="/notes/delete" method="POST">
-                <input type="hidden" name="note_id" value="{{.ID}}">
-                <button type="submit">Delete Note</button>
-            </form>
-		<a href="/notes/edit?id={{.ID}}">Edit Note</a>
-        </div>
-    {{else}}
-        <p>You haven't created any notes yet.</p>
-    {{end}}
-
-    <h2>Create a New Note</h2>
+    <h2>Create a Note</h2>
 
     <form action="/notes" method="POST">
         <textarea
             name="content"
-            rows="5"
-            cols="40"
+            rows="6"
+            cols="50"
             placeholder="Write your note here..."
             required
         ></textarea>
 
-        <br>
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="{{.CSRFToken}}"
+        >
 
+        <br>
         <button type="submit">Create Note</button>
     </form>
 
-    <br>
+    <hr>
 
-    <a href="/">Back to Home</a>
+    <h2>Your Notes</h2>
+
+    {{if .Notes}}
+        {{range .Notes}}
+            <div>
+                <p>{{.Content}}</p>
+
+                <a href="/notes/edit?id={{.ID}}">Edit Note</a>
+
+                <form action="/notes/delete" method="POST">
+                    <input
+                        type="hidden"
+                        name="note_id"
+                        value="{{.ID}}"
+                    >
+
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="{{$.CSRFToken}}"
+                    >
+
+                    <button type="submit">Delete Note</button>
+                </form>
+            </div>
+
+            <hr>
+        {{end}}
+    {{else}}
+        <p>You haven't created any notes yet.</p>
+    {{end}}
+
+    <form action="/logout" method="POST">
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="{{.CSRFToken}}"
+        >
+
+        <button type="submit">Log Out</button>
+    </form>
 </body>
 </html>

@@ -16,6 +16,7 @@ type Session struct {
 	TokenHash string
 	UserID    int64
 	ExpiresAt time.Time
+	CSRFToken string
 }
 
 // SetCookie stores the session token in the user's browser.
@@ -68,14 +69,17 @@ func HashToken(token string) string {
 
 // CreateSession saves a new session in PostgreSQL.
 func CreateSession(db *sql.DB, userID int64, tokenHash string) (time.Time, error) {
+	csrfToken, err := GenerateToken()
+	if err != nil {
+		return time.Time{}, err
+	} 
 	expiresAt := time.Now().Add(24 * time.Hour)
-
 	query := `
-		INSERT INTO sessions (token_hash, user_id, expires_at)
-		VALUES ($1, $2, $3)
+		INSERT INTO sessions (token_hash, user_id, expires_at, csrf_token)
+		VALUES ($1, $2, $3, $4)
 	`
 
-	_, err := db.Exec(query, tokenHash, userID, expiresAt)
+	_, err = db.Exec(query, tokenHash, userID, expiresAt, csrfToken)
 	if err != nil {
 		return time.Time{}, err
 	}
@@ -115,7 +119,7 @@ func GetSession(db *sql.DB, token string) (Session, error) {
 	tokenHash := HashToken(token)
 
 	query := `
-		SELECT token_hash, user_id, expires_at
+		SELECT token_hash, user_id, expires_at, csrf_token
 		FROM sessions
 		WHERE token_hash = $1
 		AND expires_at > NOW();
@@ -127,6 +131,7 @@ func GetSession(db *sql.DB, token string) (Session, error) {
 		&currentSession.TokenHash,
 		&currentSession.UserID,
 		&currentSession.ExpiresAt,
+		&currentSession.CSRFToken,
 	)
 
 	if err != nil {

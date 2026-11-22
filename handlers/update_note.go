@@ -44,7 +44,10 @@ func HandlerUpdateNote(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 	http.Redirect(w, r, "/profile", http.StatusSeeOther)
 }
-
+type EditData struct {
+	Note notes.Note
+	CSRFToken string
+}
 func HandlerEditNote(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	userID, ok := middleware.UserIDFromContext(r.Context())
 	if !ok {
@@ -70,13 +73,22 @@ func HandlerEditNote(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "could not retrieve note", http.StatusInternalServerError)
 		return
 	}
+	csrfToken, ok := middleware.CSRFTokenFromContext(r.Context())
+	if !ok {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	data := EditData{
+		Note: note,
+		CSRFToken: csrfToken,
+	}
 	tmpl, err := template.ParseFiles("templates/edit_note.html")
 	if err != nil {
 		http.Error(w, "couldn't parse template", http.StatusInternalServerError)
 		return
 	}
 
-	err = tmpl.Execute(w, note)
+	err = tmpl.Execute(w, data)
 	if err != nil {
 		http.Error(w, "failed to render template", http.StatusInternalServerError)
 		return

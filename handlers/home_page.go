@@ -9,7 +9,8 @@ import (
 )
 
 type HomePageData struct {
-	LoggedIn bool
+	LoggedIn  bool
+	CSRFToken string
 }
 
 func HandlerHomePage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
@@ -24,10 +25,11 @@ func HandlerHomePage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	sessionCookie, err := r.Cookie("session")
 
 	if err == nil {
-		_, err = sessions.GetSession(db, sessionCookie.Value)
+		session, err := sessions.GetSession(db, sessionCookie.Value)
 
 		if err == nil {
 			data.LoggedIn = true
+			data.CSRFToken = session.CSRFToken
 		} else if !errors.Is(err, sessions.ErrSessionNotFound) {
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return

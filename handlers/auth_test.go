@@ -82,7 +82,61 @@ func TestRequireAuthSuccess(t *testing.T) {
 	}
 
 }
+func TestHandlerLogoutInvalidatesSession(t *testing.T) {
+	db := testutil.SetupTestDB(t)
+	userID := testutil.CreateTestUser(t, db)
+	token, _ := testutil.CreateTestSession(t, db, userID)
 
+	// Step 1: Simulate logging out.
+	logoutReq := httptest.NewRequest(http.MethodPost, "/logout", nil)
+
+	logoutReq.AddCookie(&http.Cookie{
+		Name:  "session",
+		Value: token,
+	})
+
+	logoutRecorder := httptest.NewRecorder()
+
+	HandlerLogout(logoutRecorder, logoutReq, db)
+
+	if logoutRecorder.Code != http.StatusSeeOther {
+		t.Fatalf(
+			"expected logout status 303, got %d",
+			logoutRecorder.Code,
+		)
+	}
+
+	// Step 2: Attempt to reuse the original session token.
+	profileReq := httptest.NewRequest(http.MethodGet, "/profile", nil)
+
+	profileReq.AddCookie(&http.Cookie{
+		Name:  "session",
+		Value: token,
+	})
+
+	profileRecorder := httptest.NewRecorder()
+
+	funcExecuted := false
+
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		funcExecuted = true
+	})
+
+	protectedHandler := middleware.RequireAuth(db, handler)
+	protectedHandler.ServeHTTP(profileRecorder, profileReq)
+
+	// Step 3: Verify that the old session is rejected.
+	if profileRecorder.Code != http.StatusUnauthorized {
+		t.Errorf(
+			"expected status 401, got %d",
+			profileRecorder.Code,
+		)
+	}
+
+	if funcExecuted {
+		t.Error("protected handler executed after logout")
+	}
+}
 func TestRequireAuthInvalidSession(t *testing.T) {
 	db := testutil.SetupTestDB(t)
 	funcExecuted := false

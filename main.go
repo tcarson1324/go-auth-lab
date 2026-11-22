@@ -34,20 +34,26 @@ func main() {
 		}),
 	))
 	mux.Handle("POST /notes",
-		middleware.RequireAuth(db,
+		middleware.RequireAuth(db, middleware.RequireCSRF(
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				handlers.HandlerCreateNote(w, r, db)
 			}),
-		),
+		)),
 	)
 	mux.Handle("POST /notes/edit",
-		middleware.RequireAuth(db,
-			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { handlers.HandlerUpdateNote(w, r, db) })))
+		middleware.RequireAuth(db, middleware.RequireCSRF(
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				handlers.HandlerUpdateNote(w, r, db)
+			}),
+		)),
+	)
 	mux.Handle("POST /notes/delete",
-		middleware.RequireAuth(db,
+		middleware.RequireAuth(db, middleware.RequireCSRF(
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				handlers.HandlerDelteNote(w, r, db)
-			})))
+			}),
+		)),
+	)
 	mux.Handle("GET /profile",
 		middleware.RequireAuth(db,
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -64,9 +70,13 @@ func main() {
 	mux.HandleFunc("POST /login", func(w http.ResponseWriter, r *http.Request) {
 		handlers.HandlerLogin(w, r, db)
 	})
-	mux.HandleFunc("POST /logout", func(w http.ResponseWriter, r *http.Request) {
-		handlers.HandlerLogout(w, r, db)
-	})
+	mux.Handle("POST /logout",
+		middleware.RequireAuth(db, middleware.RequireCSRF(
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				handlers.HandlerLogout(w, r, db)
+			}),
+		)),
+	)
 	err = http.ListenAndServe(":8080", mux)
 	if err != nil {
 		log.Fatal(err)

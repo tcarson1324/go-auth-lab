@@ -14,6 +14,7 @@ type ProfilePageData struct {
 	UserID   int64
 	Username string
 	Notes    []notes.Note
+	CSRFToken string
 }
 
 func HandlerProfile(w http.ResponseWriter, r *http.Request, db *sql.DB) {
@@ -32,6 +33,11 @@ func HandlerProfile(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
+	csrfToken, ok := middleware.CSRFTokenFromContext(r.Context())
+	if !ok {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
 	notes, err := notes.GetNotesByUserID(db, userID)
 	if err != nil {
 		http.Error(w, "couldn't retieve notes", http.StatusInternalServerError)
@@ -46,6 +52,7 @@ func HandlerProfile(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		UserID:   userID,
 		Username: user.Username,
 		Notes:    notes,
+		CSRFToken: csrfToken,
 	}
 	err = tmpl.Execute(w, profileData)
 	if err != nil {

@@ -2,19 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Edit Note</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Note - Go Auth Lab</title>
 </head>
 <body>
     <h1>Edit Note</h1>
 
     <form action="/notes/edit" method="POST">
+        <input
+            type="hidden"
+            name="note_id"
+            value="{{.Note.ID}}"
+        >
 
-        <input type="hidden" name="note_id" value="{{.ID}}">
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="{{.CSRFToken}}"
+        >
 
-        <textarea name="content" rows="6" cols="50">{{.Content}}</textarea>
+        <textarea name="content" rows="6" cols="50">{{.Note.Content}}</textarea>
 
+        <br>
         <button type="submit">Save Changes</button>
-
     </form>
 
     <a href="/profile">Cancel</a>
